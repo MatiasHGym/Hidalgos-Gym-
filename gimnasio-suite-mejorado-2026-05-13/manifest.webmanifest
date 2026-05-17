@@ -1,9 +1,0 @@
-{
-  "name": "Yoga Hidalgo´s GYM",
-  "short_name": "Yoga",
-  "start_url": "./index.html",
-  "display": "standalone",
-  "background_color": "#f4eee5",
-  "theme_color": "#f4eee5",
-  "icons": []
-}
