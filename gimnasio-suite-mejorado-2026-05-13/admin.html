@@ -1,0 +1,360 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#111818" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self' https://ewrkclebqdgfsntsoqjs.supabase.co; object-src 'none'; base-uri 'none'; form-action 'self'" />
+    <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=(), payment=(), usb=()" />
+    <meta name="referrer" content="no-referrer" />
+    <title>Admin | Hidalgo´s GYM</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body class="admin-body is-locked">
+    <section class="security-lock" id="securityLock" aria-live="polite">
+      <form class="security-card" id="securityForm">
+        <p class="eyebrow">Acceso protegido</p>
+        <h1>Administrador</h1>
+        <p>Ingresa la clave para ver clientes, pagos y respaldos.</p>
+        <label>
+          Clave
+          <input id="securityPin" type="password" inputmode="numeric" autocomplete="current-password" maxlength="8" required />
+        </label>
+        <p class="security-message" id="securityMessage" role="status"></p>
+        <button class="primary-button" type="submit">Entrar</button>
+      </form>
+    </section>
+    <main class="app-shell admin-shell">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Hidalgo´s GYM</p>
+          <h1>Administrador</h1>
+        </div>
+        <div class="admin-tools">
+          <label class="global-search">
+            Buscar cliente
+            <input id="globalSearch" type="search" placeholder="Nombre, teléfono o RUT" autocomplete="off" />
+          </label>
+          <button class="ghost-button" id="importBackupButton" type="button">Importar respaldo</button>
+          <button class="ghost-button" id="exportBackupButton" type="button">Exportar respaldo</button>
+          <button class="ghost-button" id="migrateCloudButton" type="button">Migrar a nube</button>
+          <input id="importBackupInput" type="file" accept="application/json,.json" hidden />
+        </div>
+      </header>
+      <div class="global-results" id="globalSearchResults" hidden></div>
+
+      <section class="quick-stats admin-stats" aria-label="Resumen general">
+        <button class="stat-card" id="upcomingButton" type="button">
+          <span>Por vencer</span>
+          <strong id="upcomingCount">0</strong>
+        </button>
+        <button class="stat-card" id="expiredButton" type="button">
+          <span>Vencidos</span>
+          <strong id="expiredCount">0</strong>
+        </button>
+        <article>
+          <span>Pagos mes</span>
+          <strong id="monthPayments">$0</strong>
+        </article>
+      </section>
+
+      <section class="admin-view is-active" id="principalView">
+        <div class="section-head">
+          <div>
+            <h2>Principal</h2>
+            <p>Estado comercial y operación del día</p>
+          </div>
+        </div>
+
+        <section class="admin-panel">
+          <div class="list-head">
+            <h3>Clientes</h3>
+            <span>Todos los registros</span>
+          </div>
+          <div class="attendance-list" id="actionList"></div>
+        </section>
+
+        <section class="admin-panel">
+          <div class="list-head">
+            <h3>Rutas de profesores</h3>
+            <span>Accesos rápidos</span>
+          </div>
+          <div class="route-list">
+            <a href="index.html?area=yoga"><span>Yoga</span><span>Entrar</span></a>
+            <a href="boxeo/index.html"><span>Boxeo</span><span>Entrar</span></a>
+            <a href="pesas/index.html"><span>Acondicionamiento con pesas</span><span>Entrar</span></a>
+          </div>
+        </section>
+      </section>
+
+      <section class="admin-view" id="financeView">
+        <div class="section-head">
+          <div>
+            <h2 id="planFormTitle">Finanzas</h2>
+            <p>Planes, precios y vencimientos</p>
+          </div>
+          <button class="ghost-button" id="cancelPlanEditButton" type="button" hidden>Cancelar</button>
+        </div>
+
+        <form class="client-form" id="planForm">
+          <label>
+            Nombre del plan
+            <input id="planName" required type="text" placeholder="Mensual yoga, boxeo 2 días..." />
+          </label>
+          <label>
+            Precio
+            <input id="planPrice" min="1" required type="number" inputmode="numeric" placeholder="25000" />
+          </label>
+          <fieldset>
+            <legend>Ruta</legend>
+            <div class="route-picker" id="planRoutePicker">
+              <label>
+                <input type="radio" name="planRoute" value="yoga" checked />
+                <span>Yoga</span>
+              </label>
+              <label>
+                <input type="radio" name="planRoute" value="pilates" />
+                <span>Pilates</span>
+              </label>
+              <label>
+                <input type="radio" name="planRoute" value="boxeo" />
+                <span>Boxeo</span>
+              </label>
+              <label>
+                <input type="radio" name="planRoute" value="pesas" />
+                <span>Pesas</span>
+              </label>
+            </div>
+          </fieldset>
+          <label>
+            Descripción
+            <textarea id="planDescription" rows="3" placeholder="Qué incluye este plan"></textarea>
+          </label>
+          <button class="primary-button" id="savePlanButton" type="submit">Guardar plan</button>
+        </form>
+
+        <div class="admin-panel">
+          <div class="list-head">
+            <h3>Planes creados</h3>
+            <span id="planCount">0</span>
+          </div>
+          <div class="attendance-list" id="planList"></div>
+        </div>
+      </section>
+
+      <section class="admin-view" id="dashboardView">
+        <div class="section-head">
+          <div>
+            <h2>Dashboard</h2>
+            <p>Métricas críticas del negocio</p>
+          </div>
+        </div>
+        <div class="admin-grid dashboard-grid" id="dashboardGrid"></div>
+        <div class="admin-grid route-health-grid" id="routeHealthGrid"></div>
+        <div class="admin-panel">
+          <div class="list-head">
+            <h3>Ingresos por área</h3>
+            <span>Mes actual</span>
+          </div>
+          <div class="bar-chart" id="areaRevenueChart"></div>
+        </div>
+      </section>
+
+      <section class="admin-view" id="pendingView">
+        <div class="section-head">
+          <div>
+            <h2>Planner</h2>
+            <p>Listado de fechas de pago</p>
+          </div>
+          <label class="search-control">
+            Mes
+            <input id="plannerMonth" type="month" />
+          </label>
+        </div>
+        <div class="planner-filters">
+          <label>
+            Buscar
+            <input id="plannerSearch" type="search" placeholder="Cliente, teléfono o RUT" />
+          </label>
+          <label>
+            Ruta
+            <select id="plannerRouteFilter">
+              <option value="all">Todas</option>
+              <option value="pilates">Yoga</option>
+              <option value="boxeo">Boxeo</option>
+              <option value="pesas">Pesas</option>
+            </select>
+          </label>
+          <label>
+            Estado
+            <select id="plannerStatusFilter">
+              <option value="all">Todos</option>
+              <option value="upcoming">Por vencer</option>
+              <option value="expired">Vencidos</option>
+              <option value="missingPlan">Sin plan</option>
+              <option value="missingDate">Sin fecha</option>
+            </select>
+          </label>
+        </div>
+        <div class="attendance-list" id="plannerList"></div>
+      </section>
+
+      <nav class="admin-tabs" aria-label="Secciones">
+        <button class="tab is-active" type="button" data-admin-tab="principal">Principal</button>
+        <button class="tab" type="button" data-admin-tab="finance">Finanzas</button>
+        <button class="tab" type="button" data-admin-tab="dashboard">Dashboard</button>
+        <button class="tab" type="button" data-admin-tab="pending">Planner</button>
+      </nav>
+    </main>
+
+    <dialog class="client-dialog" id="statusDialog">
+      <div class="dialog-content">
+        <div class="dialog-head">
+          <div>
+            <p class="eyebrow" id="statusDialogKicker">Clientes</p>
+            <h2 id="statusDialogTitle">Detalle</h2>
+          </div>
+          <button class="icon-button" id="closeStatusDialog" type="button" aria-label="Cerrar">×</button>
+        </div>
+        <div class="attendance-list" id="statusList"></div>
+      </div>
+    </dialog>
+
+    <dialog class="client-dialog" id="clientDialog">
+      <div class="dialog-content">
+        <div class="dialog-head">
+          <div>
+            <p class="eyebrow">Cliente</p>
+            <h2 id="clientDialogName"></h2>
+          </div>
+          <button class="icon-button" id="closeClientDialog" type="button" aria-label="Cerrar">×</button>
+        </div>
+        <div class="detail-grid" id="clientDialogDetails"></div>
+        <div class="dialog-actions client-fast-actions">
+          <a class="ghost-button" id="clientWhatsappButton" href="#" target="_blank" rel="noopener" hidden>WhatsApp</a>
+        </div>
+        <form class="client-form admin-client-edit" id="adminClientForm">
+          <label>
+            Nombre completo
+            <input id="adminClientName" type="text" />
+          </label>
+          <label>
+            RUT
+            <input id="adminClientRut" type="text" />
+          </label>
+          <label>
+            Teléfono
+            <input id="adminClientPhone" type="tel" />
+          </label>
+          <div class="form-grid">
+            <label>
+              Edad
+              <input id="adminClientAge" min="1" type="number" inputmode="numeric" />
+            </label>
+            <label>
+              Área
+              <select id="adminClientProgram">
+                <option value="yoga">Yoga</option>
+                <option value="pilates">Pilates</option>
+                <option value="boxeo">Boxeo</option>
+                <option value="pesas">Pesas</option>
+              </select>
+            </label>
+          </div>
+          <section class="membership-editor">
+            <div class="list-head">
+              <h3>Planes y horarios</h3>
+              <span>Por área</span>
+            </div>
+            <label>
+              Plan
+              <select id="adminClientPlan"></select>
+            </label>
+            <label>
+              Fecha mensual de pago
+              <input id="adminClientPaymentDate" type="date" />
+            </label>
+            <fieldset>
+              <legend>Horarios del área seleccionada</legend>
+              <div class="schedule-grid admin-schedule-grid" id="adminClientScheduleOptions"></div>
+            </fieldset>
+            <button class="ghost-button" id="upsertMembershipButton" type="button">Agregar / actualizar área</button>
+            <div class="membership-list" id="adminMembershipList"></div>
+          </section>
+          <label>
+            Notas
+            <textarea id="adminClientComplications" rows="3"></textarea>
+          </label>
+          <div class="dialog-actions">
+            <button class="primary-button" type="submit">Guardar cambios</button>
+            <button class="danger-button" id="deleteAdminClientButton" type="button">Eliminar cliente</button>
+          </div>
+        </form>
+        <form class="client-form payment-register" id="adminPaymentForm">
+          <div class="list-head">
+            <h3>Registrar pago</h3>
+            <span>Queda en el historial del cliente</span>
+          </div>
+          <div class="form-grid">
+            <label>
+              Fecha
+              <input id="adminPaymentDate" type="date" required />
+            </label>
+            <label>
+              Monto
+              <input id="adminPaymentAmount" type="number" inputmode="numeric" min="1" required placeholder="25000" />
+            </label>
+          </div>
+          <div class="form-grid">
+            <label>
+              Método
+              <select id="adminPaymentMethod">
+                <option value="Efectivo">Efectivo</option>
+                <option value="Tarjeta">Tarjeta</option>
+                <option value="Transferencia">Transferencia</option>
+              </select>
+            </label>
+            <label>
+              Nota
+              <input id="adminPaymentNote" type="text" placeholder="Mes pagado, abono..." />
+            </label>
+          </div>
+          <button class="primary-button" type="submit">Guardar pago</button>
+        </form>
+        <section class="admin-panel client-history-panel">
+          <div class="list-head">
+            <h3>Historial</h3>
+            <span>Pagos y asistencias</span>
+          </div>
+          <div class="attendance-list compact-history" id="clientHistory"></div>
+        </section>
+      </div>
+    </dialog>
+
+    <dialog class="client-dialog backup-dialog" id="backupDialog">
+      <div class="dialog-content">
+        <div class="dialog-head">
+          <div>
+            <p class="eyebrow">Respaldo</p>
+            <h2>Archivo generado</h2>
+          </div>
+          <button class="icon-button" id="closeBackupDialog" type="button" aria-label="Cerrar">×</button>
+        </div>
+        <p class="backup-help">
+          Si el navegador no descarga el archivo automáticamente, copia este respaldo y guárdalo como archivo JSON.
+        </p>
+        <p class="backup-filename" id="backupFilename"></p>
+        <textarea id="backupText" readonly rows="10"></textarea>
+        <div class="dialog-actions">
+          <button class="primary-button" id="copyBackupButton" type="button">Copiar respaldo</button>
+          <button class="ghost-button" id="closeBackupButton" type="button">Cerrar</button>
+        </div>
+      </div>
+    </dialog>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script src="supabase-config.js"></script>
+    <script src="supabase-client.js"></script>
+    <script src="admin.js"></script>
+  </body>
+</html>
