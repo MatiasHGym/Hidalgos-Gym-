@@ -27,6 +27,7 @@
     globalSearchResults: $("#globalSearchResults"),
     exportBackupButton: $("#exportBackupButton"),
     importBackupButton: $("#importBackupButton"),
+    migrateCloudButton: $("#migrateCloudButton"),
     importBackupInput: $("#importBackupInput"),
     actionList: $("#actionList"),
     planForm: $("#planForm"),
@@ -136,6 +137,11 @@
   }
 
   function getAll(name) {
+    if (window.HidalgoCloud?.isReady()) return window.HidalgoCloud.all(name);
+    return getAllLocal(name);
+  }
+
+  function getAllLocal(name) {
     return new Promise((resolve, reject) => {
       const request = store(name).getAll();
       request.onsuccess = () => resolve(request.result || []);
@@ -144,6 +150,7 @@
   }
 
   function putItem(name, item) {
+    if (window.HidalgoCloud?.isReady()) return window.HidalgoCloud.put(name, item);
     return new Promise((resolve, reject) => {
       const request = store(name, "readwrite").put(item);
       request.onsuccess = () => {
@@ -155,6 +162,7 @@
   }
 
   function deleteItem(name, id) {
+    if (window.HidalgoCloud?.isReady()) return window.HidalgoCloud.delete(name, id);
     return new Promise((resolve, reject) => {
       const request = store(name, "readwrite").delete(id);
       request.onsuccess = () => {
@@ -1201,6 +1209,29 @@
     }
   }
 
+  async function migrateLocalDataToCloud() {
+    if (!window.HidalgoCloud?.isReady()) {
+      showToast("Primero inicia sesion en Supabase.");
+      return;
+    }
+    const ok = window.confirm("¿Subir los datos locales de este navegador a Supabase? Esto combina registros, no borra la nube.");
+    if (!ok) return;
+    try {
+      const stores = ["plans", "schedules", "clients", "attendance", "payments"];
+      for (const storeName of stores) {
+        const rows = await getAllLocal(storeName);
+        for (const row of rows) {
+          if (row?.id) await window.HidalgoCloud.put(storeName, row);
+        }
+      }
+      await refreshState();
+      showToast("Datos locales migrados a Supabase.");
+    } catch (error) {
+      console.error(error);
+      showToast("No se pudo migrar a Supabase.");
+    }
+  }
+
   function showToast(message) {
     els.toast.textContent = message;
     els.toast.classList.add("is-visible");
@@ -1216,6 +1247,7 @@
     els.globalSearch.addEventListener("input", renderGlobalSearch);
     els.exportBackupButton.addEventListener("click", exportBackup);
     els.importBackupButton.addEventListener("click", () => els.importBackupInput.click());
+    els.migrateCloudButton.addEventListener("click", migrateLocalDataToCloud);
     els.importBackupInput.addEventListener("change", importBackupFile);
     els.plannerMonth.addEventListener("change", renderPlanner);
     els.plannerSearch.addEventListener("input", renderPlanner);
@@ -1239,6 +1271,7 @@
   }
 
   async function startAdmin() {
+    await window.HidalgoCloud?.requireLogin?.({ title: "Administrador" });
     bindEvents();
     els.plannerMonth.value = monthKey(todayInputValue());
     db = await openDatabase();

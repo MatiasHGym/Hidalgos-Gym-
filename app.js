@@ -127,6 +127,7 @@
   }
 
   function getAll(name) {
+    if (window.HidalgoCloud?.isReady()) return window.HidalgoCloud.all(name);
     return new Promise((resolve, reject) => {
       const request = store(name).getAll();
       request.onsuccess = () => resolve(request.result || []);
@@ -135,6 +136,7 @@
   }
 
   function putItem(name, item) {
+    if (window.HidalgoCloud?.isReady()) return window.HidalgoCloud.put(name, item);
     return new Promise((resolve, reject) => {
       const request = store(name, "readwrite").put(item);
       request.onsuccess = () => {
@@ -146,6 +148,7 @@
   }
 
   function deleteItem(name, id) {
+    if (window.HidalgoCloud?.isReady()) return window.HidalgoCloud.delete(name, id);
     return new Promise((resolve, reject) => {
       const request = store(name, "readwrite").delete(id);
       request.onsuccess = () => {
@@ -847,6 +850,7 @@
   }
 
   async function init() {
+    await window.HidalgoCloud?.requireLogin?.({ title: PROGRAM_NAME });
     document.title = `${PROGRAM_NAME} | Hidalgo´s GYM`;
     els.programTitle.textContent = PROGRAM_NAME;
     els.attendanceDate.value = currentWeekValue();

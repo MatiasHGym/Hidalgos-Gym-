@@ -42,18 +42,25 @@ body.admin-body.is-locked .admin-shell {
   display: none;
 }
 
-.security-lock {
+body.cloud-locked .app-shell {
+  display: none;
+}
+
+.security-lock,
+.cloud-login-lock {
   min-height: 100vh;
   display: none;
   place-items: center;
   padding: 24px;
 }
 
-body.admin-body.is-locked .security-lock {
+body.admin-body.is-locked .security-lock,
+body.cloud-locked .cloud-login-lock {
   display: grid;
 }
 
-.security-card {
+.security-card,
+.cloud-login-card {
   width: min(440px, 100%);
   display: grid;
   gap: 16px;
@@ -66,14 +73,17 @@ body.admin-body.is-locked .security-lock {
   padding: 24px;
 }
 
-.security-card h1 {
+.security-card h1,
+.cloud-login-card h1 {
   margin: 0;
   color: #effaf7;
   font-size: 2rem;
 }
 
 .security-card p:not(.eyebrow),
-.security-card label {
+.security-card label,
+.cloud-login-card p:not(.eyebrow),
+.cloud-login-card label {
   color: #a8bbb5;
 }
 
@@ -83,7 +93,8 @@ body.admin-body.is-locked .security-lock {
   font-weight: 800;
 }
 
-.security-card input {
+.security-card input,
+.cloud-login-card input {
   width: 100%;
   margin-top: 7px;
   border: 1px solid #344846;

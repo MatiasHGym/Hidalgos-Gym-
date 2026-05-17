@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#111818" />
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self' https://ewrkclebqdgfsntsoqjs.supabase.co; object-src 'none'; base-uri 'none'; form-action 'self'" />
     <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=(), payment=(), usb=()" />
     <meta name="referrer" content="no-referrer" />
     <title>Admin | Hidalgo´s GYM</title>
@@ -37,6 +37,7 @@
           </label>
           <button class="ghost-button" id="importBackupButton" type="button">Importar respaldo</button>
           <button class="ghost-button" id="exportBackupButton" type="button">Exportar respaldo</button>
+          <button class="ghost-button" id="migrateCloudButton" type="button">Migrar a nube</button>
           <input id="importBackupInput" type="file" accept="application/json,.json" hidden />
         </div>
       </header>
@@ -352,6 +353,8 @@
     </dialog>
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script src="supabase-config.js"></script>
+    <script src="supabase-client.js"></script>
     <script src="admin.js"></script>
   </body>
 </html>
